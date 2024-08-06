@@ -22,17 +22,21 @@ const formatDate = (date) => {
 };
 
 export default function Home() {
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content:
-        "Hi! I'm the Headstarter support assistant. How can I help you today?",
-      timestamp: new Date(),
-    },
-  ]);
-
+  const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // Initialize messages on the client side
+    setMessages([
+      {
+        role: 'assistant',
+        content:
+          "Hi! I'm the Headstarter support assistant. How can I help you today?",
+        timestamp: new Date(),
+      },
+    ]);
+  }, []);
 
   const sendMessage = async () => {
     if (!message.trim()) return; // Don't send empty messages
