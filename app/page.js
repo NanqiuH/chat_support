@@ -48,11 +48,7 @@ export default function Home() {
       timestamp: new Date(),
     };
 
-    setMessages((messages) => [
-      ...messages,
-      userMessage,
-      { role: 'assistant', content: '', timestamp: new Date() }, // Placeholder for assistant response
-    ]);
+    setMessages((messages) => [...messages, userMessage]);
     setMessage('');
 
     try {
@@ -71,23 +67,32 @@ export default function Home() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
 
+      // Add placeholder for the incoming assistant message
+      setMessages((messages) => [
+        ...messages,
+        { role: 'assistant', content: '', timestamp: new Date() },
+      ]);
+
+      let currentContent = '';
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        const text = decoder.decode(value, { stream: true });
+        currentContent += decoder.decode(value, { stream: true });
+
         setMessages((messages) => {
-          let lastMessage = messages[messages.length - 1];
-          let otherMessages = messages.slice(0, messages.length - 1);
-          return [
-            ...otherMessages,
-            {
-              ...lastMessage,
-              content: lastMessage.content + text,
-              timestamp: new Date(),
-            },
-          ];
+          const updatedMessages = [...messages];
+          updatedMessages[updatedMessages.length - 1].content = currentContent;
+          return updatedMessages;
         });
       }
+
+      // Update the timestamp after receiving the full message
+      setMessages((messages) => {
+        const updatedMessages = [...messages];
+        updatedMessages[updatedMessages.length - 1].timestamp = new Date();
+        return updatedMessages;
+      });
     } catch (error) {
       console.error('Error:', error);
       setMessages((messages) => [
